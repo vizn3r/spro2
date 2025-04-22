@@ -159,5 +159,4 @@ typedef struct {
   weather_day_t day;
   weather_astro_t astro;
   weather_aqi_t air_quality;
-
 } forecast_t;

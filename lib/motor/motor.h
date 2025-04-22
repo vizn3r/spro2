@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -17,19 +18,16 @@ typedef enum {
 
 // I2C registers on the motor
 typedef enum {
-  // Control registers (read/write)
-  MOT_REG_CONTROL, // Set the control register bytes
-  // Step mode
-  MOT_REG_STEP_ANGLE, // Set angle of one step in step mode
-  MOT_REG_STEPS,      // Set the steps the motor should make
   // Angle mode
-  MOT_REG_ANGLE, // Set the angle motor should hold
+  MOT_REG_ANGLE = 0x00, // Set the angle motor should hold
 
   // State registers (read)
-  MOT_REG_ANG_CURR,   // Current angle
-  MOT_REG_STEPS_CURR, // Current number of steps from home
-  MOT_REG_STAT,       // State of the motor
-  MOT_REG_STAT_ERROR, // Error code, when no error, it will be MOT_ERR_NONE
+  MOT_REG_ANG_CURR = 0x04,   // Current angle
+  MOT_REG_STAT = 0x08,       // State of the motor
+  MOT_REG_STAT_ERROR = 0x09, // Error code
+
+  // Control register
+  MOT_REG_CONTROL = 0x0a, // Set the control register bytes
 } mot_reg_t;
 
 enum mot_control_reg_t {
@@ -38,7 +36,7 @@ enum mot_control_reg_t {
   MOT_CR_BREAK, // Enable break
   MOT_CR_DIR,   // Spin direction
   MOT_CR_LED,   // On/Off LED indicators
-  MOT_CR_MODE,  // Step/Angle mode
+  MOT_CR_UNSET, // UNSET for now
 
   // Triggers
   MOT_CR_HOME,      // Set current position as home
@@ -77,20 +75,17 @@ typedef struct {
 void mot_init();
 
 // Create new motor object, returns address pointer
-motor_t *mot_new(uint8_t i2c_address);
+motor_t mot_new(uint8_t i2c_address);
 
 // General functions for communication
 
 // Write `data` to `motor` `reg` register
-void mot_write_reg(motor_t *motor, mot_reg_t reg, uint8_t data);
+void mot_write_reg(motor_t *motor, mot_reg_t reg, uint8_t *data, size_t len);
 
 // Read `data` from `reg` register, returns uint8_t[]
-uint8_t *mot_read_reg(motor_t *motor, mot_reg_t reg);
+void mot_read_reg(motor_t *motor, mot_reg_t reg, uint8_t **dest);
 
 // Setting of the motor settings
-
-// Do n `steps` on `motor` in `direction`
-void mot_step(motor_t *motor, mot_dir_t direction, unsigned int steps);
 
 // Rotate `angle` degrees on `motor` in `direction`
 void mot_angle(motor_t *motor, mot_dir_t direction, float angle);

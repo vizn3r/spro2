@@ -5,6 +5,8 @@
 #include "hal/gpio_types.h"
 #include "hal/i2c_types.h"
 #include "portmacro.h"
+#include <stddef.h>
+#include <stdint.h>
 
 #define I2C_SCL 22
 #define I2C_SDA 21
@@ -30,12 +32,14 @@ void i2c_init() {
   }
 }
 
-void i2c_write(uint8_t addr, uint8_t reg_addr, uint8_t data) {
+void i2c_write(uint8_t addr, uint8_t reg_addr, uint8_t *data, size_t len) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
 
   i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_WRITE, true);
   i2c_master_write_byte(cmd, reg_addr, true);
-  i2c_master_write_byte(cmd, data, true);
+
+  for (size_t i = 0; i < len; i++)
+    i2c_master_write_byte(cmd, data[i], true);
 
   i2c_master_stop(cmd);
   esp_err_t ret = i2c_master_cmd_begin(I2C_NUM, cmd, 1000 / portTICK_PERIOD_MS);
@@ -46,8 +50,7 @@ void i2c_write(uint8_t addr, uint8_t reg_addr, uint8_t data) {
   i2c_cmd_link_delete(cmd);
 }
 
-uint8_t i2c_read(uint8_t addr, uint8_t reg_addr) {
-  uint8_t data = 0;
+void i2c_read(uint8_t addr, uint8_t reg_addr, uint8_t *dest, size_t len) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
 
   i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_WRITE, true);
@@ -55,7 +58,10 @@ uint8_t i2c_read(uint8_t addr, uint8_t reg_addr) {
 
   i2c_master_start(cmd);
   i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_READ, true);
-  i2c_master_read_byte(cmd, &data, I2C_MASTER_NACK);
+  if (len > 1) {
+    i2c_master_read(cmd, dest, len, I2C_MASTER_NACK);
+  }
+  i2c_master_read_byte(cmd, dest + len - 1, I2C_MASTER_NACK);
 
   i2c_master_stop(cmd);
   esp_err_t ret = i2c_master_cmd_begin(I2C_NUM, cmd, 1000 / portTICK_PERIOD_MS);
@@ -64,6 +70,4 @@ uint8_t i2c_read(uint8_t addr, uint8_t reg_addr) {
   }
 
   i2c_cmd_link_delete(cmd);
-
-  return data;
 }
