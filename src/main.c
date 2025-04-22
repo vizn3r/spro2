@@ -9,11 +9,13 @@ int main(void) {
 
   DDRC |= (1 << PC7);
 
+  MOT_ANG = 100;
+
   for (;;) {
     PORTC |= (1 << PORTC7);
-    _delay_ms(100);
+    _delay_ms(MOT_ANG);
     PORTC &= ~(1 << PORTC7);
-    _delay_ms(100);
+    _delay_ms(MOT_ANG);
   }
 
   return 0;

@@ -4,20 +4,19 @@
 
 // Code for the high level commumication protocol
 
+// Register struct
+// Do not change the order of these, or im gonna find you
 typedef struct {
-  // Control registers (read/write)
-  uint8_t CONTROL; // Set the control register bytes
-  // Step mode
-  uint8_t STEP_ANGLE; // Set angle of one step in step mode
-  uint8_t STEPS;      // Set the steps the motor should make
   // Angle mode
-  uint8_t ANGLE; // Set the angle motor should hold
+  uint8_t ANGLE[4]; // Set the angle motor should hold
 
   // State registers (read)
-  uint8_t ANG_CURR;   // Current angle
-  uint8_t STEPS_CURR; // Current number of steps from home
-  uint8_t STAT;       // State of the motor
-  uint8_t STAT_ERROR; // Error code, when no error, it will be MOT_ERR_NONE
+  uint8_t ANG_CURR[4];   // Current angle
+  uint8_t STAT[1];       // State of the motor
+  uint8_t STAT_ERROR[1]; // Error code, when no error, it will be MOT_ERR_NONE
+
+  // Control register
+  uint8_t CONTROL[1];
 } mot_reg_t;
 
 volatile uint8_t mot_registers[sizeof(mot_reg_t)];
@@ -26,29 +25,20 @@ volatile uint8_t mot_registers[sizeof(mot_reg_t)];
 
 #define _MOT_REGS ((volatile mot_reg_t *)mot_registers)
 
-// Motor Control Register
-#define MOT_CR _MOT_REGS->CONTROL
-
-// Motor Step Angle Register
-#define MOT_STP_ANG _MOT_REGS->STEP_ANGLE
-
-// Motor Steps Register
-#define MOT_STP _MOT_REGS->STEPS
-
 // Motor Angle Register
 #define MOT_ANG _MOT_REGS->ANGLE
 
 // Motor Current Angle Register
 #define MOT_CANG _MOT_REGS->ANG_CURR
 
-// Motor Current Steps Register
-#define MOT_CSTP _MOT_REGS->STEPS_CURR
-
 // Motor Status Register
-#define MOT_SR _MOT_REGS->STAT
+#define MOT_SR _MOT_REGS->STAT[0]
 
 // Motor Status Error Register
-#define MOT_SER _MOT_REGS->STAT_ERROR
+#define MOT_SER _MOT_REGS->STAT_ERROR[0]
+
+// Motor Control Register
+#define MOT_CR _MOT_REGS->CONTROL[0]
 
 enum mot_control_reg_t {
   // Toggles
@@ -56,7 +46,7 @@ enum mot_control_reg_t {
   MOT_CR_BREAK, // Enable break
   MOT_CR_DIR,   // Spin direction
   MOT_CR_LED,   // On/Off LED indicators
-  MOT_CR_MODE,  // Step/Angle mode
+  MOT_CR_UNSET, // UNSET for now
 
   // Triggers
   MOT_CR_HOME,      // Set current position as home

@@ -24,9 +24,9 @@ void i2c_slave_init(uint8_t addr) {
   sei();
 }
 
-volatile uint8_t i2c_data_index = 0;  // Current data index
-volatile uint8_t i2c_reg_addr = 0xFF; // Register address
-// volatile uint8_t i2c_data[DATA_BUFF_LEN]; // Data after the address, don't
+volatile uint8_t i2c_data_index = 0;      // Current data index
+volatile uint8_t i2c_reg_addr = 0xFF;     // Register address
+volatile uint8_t i2c_data[DATA_BUFF_LEN]; // Data after the address, don't
 // need it because reading only uin8_t after the address
 
 ISR(TWI_vect) {
@@ -47,7 +47,7 @@ ISR(TWI_vect) {
       i2c_reg_addr = TWDR;
     } else {
       if (i2c_reg_addr < MOT_REG_SIZE) {
-        mot_registers[i2c_reg_addr] = TWDR;
+        i2c_data[i2c_data_index - 1] = TWDR;
       }
     }
     i2c_data_index++;
@@ -57,9 +57,16 @@ ISR(TWI_vect) {
   // Slave Read Stop
   // Stop the communication and reset
   case TW_SR_STOP:
+    if (i2c_reg_addr < MOT_REG_SIZE) {
+      memcpy((uint8_t *)&mot_registers[i2c_reg_addr], (uint8_t *)i2c_data,
+             i2c_data_index);
+    } else {
+      MOT_SER = MOT_ERR_I2C_INVALID_ADDR;
+      MOT_SR = MOT_STAT_ERROR;
+    }
     i2c_data_index = 0;
     i2c_reg_addr = 0xFF;
-    // memset((void *)i2c_data, 0, sizeof(i2c_data));
+    memset((void *)i2c_data, 0, sizeof(i2c_data));
     TWCR = CLR_TWCR;
     break;
 
@@ -79,13 +86,20 @@ ISR(TWI_vect) {
   // Slave Transmission Data
   // Send NACK - stopping sending data
   case TW_ST_DATA_ACK:
+    i2c_reg_addr++;
+    if (i2c_reg_addr < MOT_REG_SIZE) {
+      TWDR = mot_registers[i2c_reg_addr];
+      TWCR = CLR_TWCR;
+    } else {
+      TWCR = NACK_TWCR;
+      i2c_reg_addr = 0xFF;
+    }
     // No more data to send :(
-    TWCR = NACK_TWCR;
     break;
 
-  // Slave Transmission Last Data (duh)
+  // Slave Transmission Last Data
   // Send NACK
-  case TW_ST_LAST_DATA:
+  case TW_ST_DATA_NACK:
     TWCR = NACK_TWCR;
     break;
 
