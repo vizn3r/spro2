@@ -31,6 +31,14 @@ First, we looked for options for the main microcontroller. Since we have the nee
 
 For the motors, we have decided to go with AVR microcontroller, since we know how to work with them from EMB classes, and from previous semester project. Specifically, we went with DFRobot Beetle with ATMega32u4 microcontroller. It comes in 8 pin package and has more than everything we need, that includes I2C interface, 3.3V logic (because of the ESP), two ADC pins for the hall effect sensors and two PWM pins for the motor control.
 
+### 2.3 Development environment
+
+We are using PlatformIO for the firmware programming in combination with native libraries and our custom code.
+
+For the ESP32, we are using the ESP-IDF framework, which provides us with all of the required functionality, together with additional custom mini libraries for communication with other parts of the system.
+
+For the ATMega32u4, we are using the AVR library, for the bare minimum, like register access and such. All of the other motor components are custom mini libraries created solely for the purpose of this project.
+
 ## 3. The motor firmware and control
 
 In development
