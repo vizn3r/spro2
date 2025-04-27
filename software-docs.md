@@ -1,6 +1,5 @@
-# Software documentation - Split Flap Display Clock
-
 <div align="center">
+  <h1>Software documentation - Split Flap Display Clock</h1>
   <p>Semester Project 2 - BEng in Mechatronics</p>
   <p>Group 1: Simon Vizner, Magnus Dubbeling Trip, Luke Huntington Piotti, Kshitiz Dev Adhikari, Joan Quiñonero Vizuete, Filip-Hannibal Dragos, Daniela Sanz Hernandez, Alessandra-Andreea Pricop</p>
   <p>27/04/2025</p>
