@@ -1,5 +1,7 @@
 #include "com.h"
 #include "i2c.h"
+#include <stdint.h>
+#include <string.h>
 
 void com_init() {
   // Power ON and status LED ON
