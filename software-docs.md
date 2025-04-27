@@ -75,7 +75,7 @@ This process is partially handled by the ESP-IDF framework on the main controlle
 
 We have these registers available:
 
-- `ANGLE `- the angle motor should hold
+- `ANGLE`- the angle motor should hold
 - `ANG_CURR` - current angle measured from the feedback
 - `STAT` - state of the motor (status codes listed later)
 - `STAT_ERROR` - if the motor status flag indicates an error, it will be stored here
