@@ -5,8 +5,13 @@
   <p>27/04/2025</p>
 </div>
 
-## 1. Requirements
+## 1. Introduction
 
+Some cool introduction.
+
+## 2. Requirements
+
+### 2.1 Basic requirements
 
 The high-level requirements for the software are straightforward:
 
@@ -18,15 +23,23 @@ The high-level requirements for the software are straightforward:
 
 These are the main goals of the software part. This document will go through every part, explaining the high- and low-level implementation of every component.
 
-## 2. The motor firmware and control
+### 2.2 Hardware requirements
+
+During the process of choosing the right hardware and microcontrollers, we focused on the bare minimum we need, because we didn't want bulky development boards with pins we wouldn't use, so we went fro the most compact options, while satisfying the Basic Requirements.
+
+First, we looked for options for the main microcontroller. Since we have the need for internet access, we went with ESP32 microcontroller in a 16 pin package, enough for everything we would possibly need, that includes UART for the Nextion display, I2C for the communication protocol and the mentioned internet access for weather API.
+
+For the motors, we have decided to go with AVR microcontroller, since we know how to work with them from EMB classes, and from previous semester project. Specifically, we went with DFRobot Beetle with ATMega32u4 microcontroller. It comes in 8 pin package and has more than everything we need, that includes I2C interface, 3.3V logic (because of the ESP), two ADC pins for the hall effect sensors and two PWM pins for the motor control.
+
+## 3. The motor firmware and control
 
 In development
 
-## 3. The main controller firmware and control
+## 4. The main controller firmware and control
 
 In development
 
-## 4. Internal communication protocol
+## 5. Internal communication protocol
 
 ### 4.1 The high-level functionality
 
@@ -160,5 +173,5 @@ volatile uint8_t mot_registers[sizeof(mot_reg_t)];
 #define MOT_CR _MOT_REGS->CONTROL[0]
 ```
 
-
-This might seem a bit confusing, like, "Why would we want this? Is it necessary?", well we just liked the idea of having our own AVR-styled registers, and a way to read/write to them just like you would with AVR library registers. And the best part is, it works! And it is really satisfying to look at the code afterwards.
+This might seem a bit confusing, like, "Why would we want this? Is it necessary?", well we just liked the idea of having our own AVR-styled registers, and a way to read/write to them just like you would 
+with AVR library registers. And the best part is, it works! And it is really satisfying to look at the code afterwards.
