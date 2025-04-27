@@ -25,6 +25,8 @@ In development
 
 ## 3. The main controller firmware and control
 
+In development
+
 ## 4. Internal communication protocol
 
 ### 4.1 The high-level functionality
