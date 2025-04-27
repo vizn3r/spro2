@@ -67,6 +67,7 @@ typedef struct {
   uint8_t address;
   mot_stat_t state;
   mot_error_t error;
+  uint8_t con_reg;
 } motor_t;
 
 // Motor high level control functions
@@ -83,7 +84,7 @@ motor_t mot_new(uint8_t i2c_address);
 void mot_write_reg(motor_t *motor, mot_reg_t reg, uint8_t *data, size_t len);
 
 // Read `data` from `reg` register, returns uint8_t[]
-void mot_read_reg(motor_t *motor, mot_reg_t reg, uint8_t **dest);
+void mot_read_reg(motor_t *motor, mot_reg_t reg, uint8_t *dest, size_t len);
 
 // Setting of the motor settings
 
