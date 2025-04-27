@@ -5,15 +5,11 @@
 
 The high-level requirements for the software are straightforward:
 
-    Firmware for motor control
-
-    Firmware for the main controller
-
-    Some kind of protocol for communication between the motor(s) and the main controller
-
-    Nextion display integration
-
-    External weather API integration
+- Firmware for motor control
+- Firmware for the main controller
+- Some kind of protocol for communication between the motor(s) and the main controller
+- Nextion display integration
+- External weather API integration
 
 These are the main goals of the software part. This document will go through every part, explaining the high- and low-level implementation of every component.
 
@@ -31,11 +27,9 @@ In development
 
 This was not that hard of a task to choose, since our microcontrollers only support these protocols:
 
-    UART
-
-    I2C (TWI)
-
-    SPI
+- UART
+- I2C (TWI)
+- SPI
 
 Since we need to have a way to communicate with more than one microcontroller, we automatically crossed out UART, since it only supports duplex communication between two devices.
 
@@ -51,30 +45,20 @@ We had to come up with some way to standardize the data transfer between the mai
 
 So, if we want to write to, let’s say, `ANGLE` register, the data flow goes as following:
 
-    Send the 7 bit address
-
-    Send the W (write) bit
-
-    Send the 8 bit register address we want to write to
-
-    Send the data
-
-    End the data transfer
+- Send the 7 bit address
+- Send the W (write) bit
+- Send the 8 bit register address we want to write to
+- Send the data
+- End the data transfer
 
 If we want to read from, for example `ANG_CURR` (current angle) register, we follow a very similar process:
 
-
-    Send the 7 bit address
-
-    Send the R (read) bit
-
-    Send the 8 bit register address we want to read from
-
-    Wait for the data
-
-    Save the incoming data
-
-    End the data transfer
+- Send the 7 bit address
+- Send the R (read) bit
+- Send the 8 bit register address we want to read from
+- Wait for the data
+- Save the incoming data
+- End the data transfer
 
 This process is partially handled by the ESP-IDF framework on the main controller side, but on the motor side, we have written this all from scratch. We are using the TWI interrupt for the data handling.
 
@@ -84,15 +68,11 @@ This process is partially handled by the ESP-IDF framework on the main controlle
 
 We have these registers available:
 
-    ANGLE - the angle motor should hold
-
-    ANG_CURR - current angle measured from the feedback
-
-    STAT - state of the motor (status codes listed later)
-
-    STAT_ERROR - if the motor status flag indicates an error, it will be stored here
-
-    CONTROL - the control register of the motor
+- `ANGLE `- the angle motor should hold
+- `ANG_CURR` - current angle measured from the feedback
+- `STAT` - state of the motor (status codes listed later)
+- `STAT_ERROR` - if the motor status flag indicates an error, it will be stored here
+- `CONTROL` - the control register of the motor
 
 The `ANGLE` (Read/Write) register stores a `float32` value of an angle the motor should hold at all times.
 
@@ -100,47 +80,34 @@ The `ANG_CURR` (Read only) register stores the value of current angle the motor 
 
 The `STAT` (Read only) register stores the current state of the motor. State can have these values:
 
-    MOT_STAT_ERROR - motor encountered an error, and stored the value into the `STAT_ERROR` register
-
-    MOT_STAT_OFF - motor driver is not active
-
-    MOT_STAT_READY - motor is ready for operation
-
-    MOT_STAT_MOVING - motor is currently moving into the position
+- `MOT_STAT_ERROR` - motor encountered an error, and stored the value into the `STAT_ERROR` register
+- `MOT_STAT_OFF` - motor driver is not active
+- `MOT_STAT_READY` - motor is ready for operation
+- `MOT_STAT_MOVING` - motor is currently moving into the position
 
 The `STAT_ERROR` (Read only) register store the error code if the `STAT` register has `MOT_STAT_ERROR` status code. Possible error values:
 
-    MOT_ERR_NONE - no error
-
-    MOT_ERR_UNDEFINED - error not defined in this list
-
-    MOT_ERR_POWER - insufficient/low power
-
-    MOT_ERR_PID - PID motor control error
-
-    MOT_ERR_DRIVER - motor driver error
-
-    MOT_ERR_I2C - I2C protocol error
-
-    MOT_ERR_I2C_INVALID_ADDR - master tried to read/write to/from an invalid register address
+- `MOT_ERR_NONE` - no error
+- `MOT_ERR_UNDEFINED` - error not defined in this list
+- `MOT_ERR_POWER` - insufficient/low power
+- `MOT_ERR_PID` - PID motor control error
+- `MOT_ERR_DRIVER` - motor driver error
+- `MOT_ERR_I2C` - I2C protocol error
+- `MOT_ERR_I2C_INVALID_ADDR` - master tried to read/write to/from an invalid register address
 
 Lastly, the `CONTROL` (Read/Write) register sets the control of the motor, using these bits (ON - 1/OFF - 0):
 
-    MOT_CR_POWER - power the driver ON(1)/OFF(0)
-
-    MOT_CR_BREAK - enable the motor driver active breaking
-
-    MOT_CR_DIR - spin direction (counter-clockwise - 1/clockwise - 0)
-
-    MOT_CR_LED - status LED indication
-
-    MOT_CR_UNSET - unused bit
+- `MOT_CR_POWER` - power the driver ON(1)/OFF(0)
+- `MOT_CR_BREAK` - enable the motor driver active breaking
+- `MOT_CR_DIR` - spin direction (counter-clockwise - 1/clockwise - 0)
+- `MOT_CR_LED` - status LED indication
+- `MOT_CR_UNSET` - unused bit
 
 Bits that trigger some functionality (DEFAULT - 0/TRIGGER - 1):
 
-    MOT_CR_HOME - set the current position as the home position (after the motor powers on, it will move to this position)
-    MOT_CR_CLEAR_ERR - clear the `STAT_ERROR` register
-    MOT_CR_RESET - reset the motor registers to default values
+- `MOT_CR_HOME` - set the current position as the home position (after the motor powers on, it will move to this position)
+- `MOT_CR_CLEAR_ERR` - clear the `STAT_ERROR` register
+- `MOT_CR_RESET` - reset the motor registers to default values
 
 #### Low-level explanation
 
@@ -186,7 +153,5 @@ volatile uint8_t mot_registers[sizeof(mot_reg_t)];
 #define MOT_CR _MOT_REGS->CONTROL[0]
 ```
 
-```
-```
 
 This might seem a bit confusing, like, "Why would we want this? Is it necessary?", well we just liked the idea of having our own AVR-styled registers, and a way to read/write to them just like you would with AVR library registers. And the best part is, it works! And it is really satisfying to look at the code afterwards.
