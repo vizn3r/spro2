@@ -1,4 +1,4 @@
-# Software documentation - Split Flap Display Clock (Analog - Digital Clock)
+# Software documentation - Split Flap Display Clock
 
 <div align="center">
   <p>Semester Project 2 - BEng in Mechatronics</p>
