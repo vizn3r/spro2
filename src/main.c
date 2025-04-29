@@ -26,10 +26,10 @@ int main(void) {
   PORTC &= ~(1 << PC7);
 
   for (;;) {
-    // blink_err(MOT_SER);
-    //  check_cr();
-    //  get_curr_ang();
-    //  mot_drive();
+    blink_err(MOT_SER);
+    get_curr_ang();
+    check_cr();
+    mot_drive();
   }
 
   return 0;
