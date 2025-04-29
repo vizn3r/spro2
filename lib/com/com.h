@@ -19,17 +19,34 @@ typedef struct {
   uint8_t CONTROL[1];
 } mot_reg_t;
 
+// EEPROM addresses
+typedef enum {
+  MOT_ADDR_ANG = 0x00,
+  MOT_ADDR_CANG = 0x04,
+  MOT_ADDR_SR = 0x08,
+  MOT_ADDR_SER = 0x09,
+  MOT_ADDR_CR = 0x0a,
+
+  // Home angle
+  MOT_ADDR_HANG = 0x0b,
+
+} mot_eeprom_addr_t;
+
 volatile uint8_t mot_registers[sizeof(mot_reg_t)];
 
 #define MOT_REG_SIZE sizeof(mot_registers)
 
 #define _MOT_REGS ((volatile mot_reg_t *)mot_registers)
 
+#define UINT8_TO_FLOAT(b) (*(volatile float *)(b))
+#define FLOAT_TO_UINT8(f) ((uint8_t *)(&(f)))
+#define MOT_TO_UINT8(m) ((uint8_t *)&(m))
+
 // Motor Angle Register
-#define MOT_ANG (*(volatile float *)(_MOT_REGS->ANGLE))
+#define MOT_ANG UINT8_TO_FLOAT(_MOT_REGS->ANGLE)
 
 // Motor Current Angle Register
-#define MOT_CANG (*(volatile float *)(_MOT_REGS->ANG_CURR))
+#define MOT_CANG UINT8_TO_FLOAT(_MOT_REGS->ANG_CURR)
 
 // Motor Status Register
 #define MOT_SR _MOT_REGS->STAT[0]
@@ -85,3 +102,4 @@ typedef enum {
 } mot_error_t;
 
 void com_init();
+void eeprom_or_def(mot_eeprom_addr_t addr, uint8_t *reg);

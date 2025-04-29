@@ -1,18 +1,18 @@
 [
     {
-        "command": "/home/vizn3r/.platformio/packages/toolchain-atmelavr/bin/avr-gcc -o .pio/build/leonardo/lib06d/com/com.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega32u4 -Os -Wall -ffunction-sections -fdata-sections -flto -DF_CPU=16000000L -DPLATFORMIO=60117 -DARDUINO_AVR_LEONARDO -Ilib/com lib/com/com.c",
+        "command": "/home/vizn3r/.platformio/packages/toolchain-atmelavr/bin/avr-gcc -o .pio/build/leonardo/lib06d/com/com.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega32u4 -Os -Wall -ffunction-sections -fdata-sections -flto -DF_CPU=16000000L -DPLATFORMIO=60118 -DARDUINO_AVR_LEONARDO -Ilib/com lib/com/com.c",
         "directory": "/home/vizn3r/spro2/motor",
         "file": "lib/com/com.c",
         "output": ".pio/build/leonardo/lib06d/com/com.o"
     },
     {
-        "command": "/home/vizn3r/.platformio/packages/toolchain-atmelavr/bin/avr-gcc -o .pio/build/leonardo/lib06d/com/i2c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega32u4 -Os -Wall -ffunction-sections -fdata-sections -flto -DF_CPU=16000000L -DPLATFORMIO=60117 -DARDUINO_AVR_LEONARDO -Ilib/com lib/com/i2c.c",
+        "command": "/home/vizn3r/.platformio/packages/toolchain-atmelavr/bin/avr-gcc -o .pio/build/leonardo/lib06d/com/i2c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega32u4 -Os -Wall -ffunction-sections -fdata-sections -flto -DF_CPU=16000000L -DPLATFORMIO=60118 -DARDUINO_AVR_LEONARDO -Ilib/com lib/com/i2c.c",
         "directory": "/home/vizn3r/spro2/motor",
         "file": "lib/com/i2c.c",
         "output": ".pio/build/leonardo/lib06d/com/i2c.o"
     },
     {
-        "command": "/home/vizn3r/.platformio/packages/toolchain-atmelavr/bin/avr-gcc -o .pio/build/leonardo/src/main.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega32u4 -Os -Wall -ffunction-sections -fdata-sections -flto -DF_CPU=16000000L -DPLATFORMIO=60117 -DARDUINO_AVR_LEONARDO -Iinclude -Isrc -Ilib/com src/main.c",
+        "command": "/home/vizn3r/.platformio/packages/toolchain-atmelavr/bin/avr-gcc -o .pio/build/leonardo/src/main.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega32u4 -Os -Wall -ffunction-sections -fdata-sections -flto -DF_CPU=16000000L -DPLATFORMIO=60118 -DARDUINO_AVR_LEONARDO -Isrc -Ilib/com src/main.c",
         "directory": "/home/vizn3r/spro2/motor",
         "file": "src/main.c",
         "output": ".pio/build/leonardo/src/main.o"

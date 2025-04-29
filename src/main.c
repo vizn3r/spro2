@@ -6,6 +6,34 @@
 
 #define SLAVE_ADDR 0x08
 #include "../lib/com/com.h"
+#include "../lib/mot/control.h"
+#include "../lib/mot/driver.h"
+#include "../lib/mot/encoder.h"
+
+// Delay for float valules (ignores floating point falue)
+void delay_ms(float ms);
+
+// Blink the LED when error is therekk
+void blink_err(mot_error_t err);
+
+// Check control register
+
+int main(void) {
+  com_init();
+
+  // LED pin
+  DDRC |= (1 << PC7);
+  PORTC &= ~(1 << PC7);
+
+  for (;;) {
+    // blink_err(MOT_SER);
+    //  check_cr();
+    //  get_curr_ang();
+    //  mot_drive();
+  }
+
+  return 0;
+}
 
 void delay_ms(float ms) {
   while (ms >= 1.0) {
@@ -19,27 +47,9 @@ void blink_err(mot_error_t err) {
     return;
   for (mot_error_t i = 0; i <= err; i++) {
     PORTC ^= (1 << PORTC7);
-    delay_ms(100);
-  }
-  delay_ms(500);
-}
-
-int main(void) {
-  com_init();
-
-  DDRC |= (1 << PC7);
-
-  MOT_ANG = 500.0;
-  // MOT_SER = MOT_ERR_UNDEFINED;
-
-  for (;;) {
-    float curr_angle = 0.0;
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { curr_angle = MOT_ANG; }
+    _delay_ms(100);
     PORTC ^= (1 << PORTC7);
-    delay_ms(curr_angle);
-
-    // blink_err(MOT_SER);
+    _delay_ms(100);
   }
-
-  return 0;
+  _delay_ms(1000);
 }
