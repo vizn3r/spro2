@@ -94,7 +94,7 @@ void mot_angle(motor_t *motor, mot_dir_t direction, float angle);
 // Getting current values of the motor
 
 // Get current position of the `motor`
-uint8_t mot_get_pos(motor_t *motor);
+void mot_get_angle(motor_t *motor, uint8_t *dest);
 
 // Get current status of the `motor`
 mot_stat_t mot_get_stat(motor_t *motor);

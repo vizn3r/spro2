@@ -22,8 +22,8 @@ void mot_angle(motor_t *motor, mot_dir_t direction, float angle) {
 
   memcpy(buff, &angle, sizeof(float));
 
-  i2c_write(motor->address, MOT_REG_CONTROL, cr_buff, 1);
-  i2c_write(motor->address, MOT_REG_ANGLE, buff, 4);
+  mot_write_reg(motor, MOT_REG_CONTROL, cr_buff, 1);
+  mot_write_reg(motor, MOT_REG_ANGLE, buff, 4);
 }
 
 void mot_write_reg(motor_t *motor, mot_reg_t reg, uint8_t *data, size_t len) {
@@ -34,8 +34,18 @@ void mot_read_reg(motor_t *motor, mot_reg_t reg, uint8_t *dest, size_t len) {
   i2c_read(motor->address, reg, dest, len);
 }
 
-uint8_t mot_get_pos(motor_t *motor);
+void mot_get_angle(motor_t *motor, uint8_t *dest) {
+  mot_read_reg(motor, MOT_REG_ANG_CURR, dest, 4);
+}
 
-mot_stat_t mot_get_stat(motor_t *motor);
+mot_stat_t mot_get_stat(motor_t *motor) {
+  uint8_t buff[1];
+  mot_read_reg(motor, MOT_REG_STAT, buff, 1);
+  return buff[0];
+}
 
-mot_error_t mot_get_err(motor_t *motor);
+mot_error_t mot_get_err(motor_t *motor) {
+  uint8_t buff[1];
+  mot_read_reg(motor, MOT_REG_STAT_ERROR, buff, 1);
+  return buff[0];
+};

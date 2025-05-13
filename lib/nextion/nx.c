@@ -4,12 +4,11 @@ Created by Simon Vizner 2024
 
 */
 
-#include "nx.h"
-#include "driver/uart.h"
-#include "hal/uart_types.h"
-#include "portmacro.h"
-#include "soc/clk_tree_defs.h"
-#include "soc/soc.h"
+#include "./nx.h"
+#include <driver/uart.h>
+#include <hal/uart_types.h>
+#include <portmacro.h>
+#include <soc/clk_tree_defs.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
