@@ -2,7 +2,7 @@
 #include "com.h"
 #include <stdbool.h>
 
-// Global variable and for toggling, so we don't write to the registers
+// For toggling so we don't write to the registers constantly
 volatile bool POWER = 0;
 volatile bool BREAK = 0;
 volatile bool DIR = MOT_DIR_CW;

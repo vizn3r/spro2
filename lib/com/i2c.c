@@ -26,8 +26,6 @@ void i2c_slave_init(uint8_t addr) {
 
   PORTD |= (1 << PORTD0) | (1 << PORTD1);
   DDRD &= ~((1 << PORTD0) | (1 << PORTD1));
-
-  sei();
 }
 
 volatile uint8_t i2c_data_index = 0;      // Current data index
