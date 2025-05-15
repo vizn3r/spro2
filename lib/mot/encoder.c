@@ -59,7 +59,7 @@ float adc_avg(uint16_t sample, volatile float *buff, volatile uint8_t *head,
 
 void get_curr_ang() {
   // IMPLEMMENT ANGLE MEASUREMENT
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { MOT_CANG = abs_angle; }
+  // ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { MOT_CANG = abs_angle; } 
 }
 
 volatile uint16_t adc_read(uint8_t channel) {
@@ -89,5 +89,7 @@ ISR(TIMER0_COMPA_vect) {
   abs_angle = atan2(sin_val, cos_val) * (180.0f / (float)M_PI);
   if (abs_angle < 0) {
     abs_angle += 360;
+    
   }
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { MOT_CANG = abs_angle; } 
 }
