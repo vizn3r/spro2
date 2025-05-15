@@ -9,67 +9,79 @@
 #define FORECAST "/forecast.json"
 #define TIMEZONE "/timezone.json"
 
+typedef struct {
+  char *name;
+  char *region;
+  char *country;
+  double lat;
+  double lon;
+  char *tz_id;
+  long localtime_epoch;
+  char *localtime;
+} api_location_t;
+
+typedef struct {
+  char *text;
+  char *icon;
+  int code;
+} api_weather_condition_t;
+
 // Refer to: https://www.weatherapi.com/docs/#apis-realtime
 typedef struct {
-  // Updates
-  char *last_updated;
   int last_updated_epoch;
-  // Temps
-  float temp_c;
-  float temp_f;
-  float feelslike_c;
-  float feelslike_f;
-  float windchill_c;
-  float windchill_f;
-  float heatindex_c;
-  float heatindex_f;
-  float dewpoint_c;
-  float dewpoint_f;
-
-  // Weather
-  char *condition_text;
-  char *condition_icon;
-  int condition_code;
-  float wind_mph;
-  float wind_kph;
+  char *last_updated;
+  double temp_c;
+  double temp_f;
+  bool is_day;
+  api_weather_condition_t condition;
+  double wind_mph;
+  double wind_kph;
   int wind_degree;
   char *wind_dir;
-  float pressure_mb;
-  float pressure_in;
-  float precip_mm;
-  float precip_in;
-  float humidity;
+  double pressure_mb;
+  double pressure_in;
+  double precip_mm;
+  double precip_in;
+  double humidity;
   int cloud;
-  bool is_day;
-  float uv;
-  float gust_mph;
-  float gust_kph;
-
+  double feelslike_c;
+  double feelslike_f;
+  double windchill_c;
+  double windchill_f;
+  double heatindex_c;
+  double heatindex_f;
+  double dewpoint_c;
+  double dewpoint_f;
+  double vis_km;
+  double vis_miles;
+  double uv;
+  double gust_mph;
+  double gust_kph;
 } curr_weather_t;
 
 // Refer to: https://www.weatherapi.com/docs/#apis-forecast
 typedef struct {
   // Temps
-  float maxtemp_c;
-  float maxtemp_f;
-  float mintemp_c;
-  float mintemp_f;
-  float avgtemp_c;
-  float avgtemp_f;
+  double maxtemp_c;
+  double maxtemp_f;
+  double mintemp_c;
+  double mintemp_f;
+  double avgtemp_c;
+  double avgtemp_f;
 
   // Weather
-  float maxwind_mph;
-  float maxwind_kph;
-  float totalprecip_mm;
-  float totalprecip_in;
-  float totalsnow_cm;
-  float avgvis_km;
-  float avgvis_miles;
+  double maxwind_mph;
+  double maxwind_kph;
+  double totalprecip_mm;
+  double totalprecip_in;
+  double totalsnow_cm;
+  double avgvis_km;
+  double avgvis_miles;
   int avghumidity;
   char *condition_text;
   char *condition_icon;
   int condition_code;
-  float uv;
+  double uv;
   bool daily_will_it_rain;
   bool daily_will_it_snow;
   int daily_chance_of_rain;
@@ -86,19 +98,19 @@ typedef struct {
 
   // Moon
   char *moon_phase;
-  float moon_illumination;
+  double moon_illumination;
   bool is_moon_up;
   bool is_sun_up;
 } weather_astro_t;
 
 // Refer to: https://www.weatherapi.com/docs/#intro-aqi
 typedef struct {
-  float co;
-  float o3;
-  float no2;
-  float so2;
-  float pm2_5;
-  float pm10;
+  double co;
+  double o3;
+  double no2;
+  double so2;
+  double pm2_5;
+  double pm10;
   int us_epa_index;
   int gb_defra_index;
 } weather_aqi_t;
@@ -110,44 +122,44 @@ typedef struct {
   char *time;
 
   // Temps
-  float temp_c;
-  float temp_f;
-  float feelslike_c;
-  float feelslike_f;
-  float windchill_c;
-  float windchill_f;
-  float heatindex_c;
-  float heatindex_f;
-  float dewpoint_c;
-  float dewpoint_f;
+  double temp_c;
+  double temp_f;
+  double feelslike_c;
+  double feelslike_f;
+  double windchill_c;
+  double windchill_f;
+  double heatindex_c;
+  double heatindex_f;
+  double dewpoint_c;
+  double dewpoint_f;
 
   // Weather
   char *condition_text;
   char *condition_icon;
   int condition_code;
-  float wind_mph;
-  float wind_kph;
+  double wind_mph;
+  double wind_kph;
   int wind_degree;
   char *wind_dir;
-  float pressure_mb;
-  float pressure_in;
-  float precip_mm;
-  float precip_in;
-  float snow_cm;
+  double pressure_mb;
+  double pressure_in;
+  double precip_mm;
+  double precip_in;
+  double snow_cm;
   int humidity;
   int cloud;
   bool will_it_rain;
   bool will_it_snow;
   bool is_day;
-  float vis_km;
-  float vis_miles;
+  double vis_km;
+  double vis_miles;
   int chance_of_rain;
   int chance_of_snow;
-  float gust_mph;
-  float gust_kph;
-  float uv;
-  float short_rad;
-  float diff_rad;
+  double gust_mph;
+  double gust_kph;
+  double uv;
+  double short_rad;
+  double diff_rad;
   weather_aqi_t air_quality;
 
 } weather_hour_t;
@@ -160,3 +172,8 @@ typedef struct {
   weather_astro_t astro;
   weather_aqi_t air_quality;
 } forecast_t;
+
+typedef struct {
+  api_location_t location;
+  curr_weather_t current;
+} weather_now_t;
