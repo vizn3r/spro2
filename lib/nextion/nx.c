@@ -231,10 +231,7 @@ void nx_send_term() {
 }
 
 void nx_send_err(uint8_t code) {
-  nx_send("cls RED");
-  nx_send(
-      "xstr 10,10,300,220,1,RED,BLACK,1,1,1,\"ERROR CODE: %x EXITING PROGRAM\"",
-      code);
+  nx_send("xstr 50,50,220,140,0,RED,BLACK,1,1,1,\"ERROR CODE: %x\"", code);
   exit(0);
 }
 

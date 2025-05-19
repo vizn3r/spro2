@@ -177,3 +177,5 @@ typedef struct {
   api_location_t location;
   curr_weather_t current;
 } weather_now_t;
+
+void get_weather_now(const char *location, const char *localization);
