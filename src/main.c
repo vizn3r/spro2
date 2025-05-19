@@ -101,9 +101,7 @@ void update_flap(motor_t motor, uint8_t flap_range, uint8_t req_flap_d) {
 
 // xTimer handles
 
-void update_weather(TimerHandle_t xTimer) {
-  get_weather_now("Sonderborg DK", "en");
-}
+void update_weather(TimerHandle_t xTimer) { get_weather_now(LOCATION, "en"); }
 
 // NVS funcs
 
@@ -130,7 +128,7 @@ void nvs_write(const char *key, char *value) {
   esp_err_t err;
 
   err = nvs_open("storage", NVS_READWRITE, &nvs);
-  // hnadle err
+  // handle err
 
   err = nvs_set_str(nvs, key, value);
   // handle err
@@ -201,6 +199,8 @@ void app_main() {
   gpio_config(&buzzer);
 
   // Initial config from user
+  config_wifi_pass();
+  config_location();
 
   // Updating flaps
 
