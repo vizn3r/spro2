@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #define F_CPU 16000000UL
 
 #include <avr/interrupt.h>
@@ -40,9 +41,8 @@ int main(void) {
   OCR1B = 0;
 
   for (;;) {
-    blink_err(MOT_SER);
-    get_curr_ang();
-    check_cr();
+    // blink_err(MOT_SER);
+    //  check_cr();
     mot_drive();
   }
 

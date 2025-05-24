@@ -40,13 +40,13 @@ volatile uint8_t mot_registers[sizeof(mot_reg_t)];
 
 #define UINT8_TO_FLOAT(b) (*(volatile float *)(b))
 #define FLOAT_TO_UINT8(f) ((uint8_t *)(&(f)))
-#define MOT_TO_UINT8(m) ((uint8_t *)&(m))
+#define MOT_TO_UINT8(m) ((uint8_t *)&(_MOT_REGS->m))
 
 // Motor Angle Register
-#define MOT_ANG UINT8_TO_FLOAT(_MOT_REGS->ANGLE)
+#define MOT_ANG (*((volatile float *)(_MOT_REGS->ANGLE)))
 
 // Motor Current Angle Register
-#define MOT_CANG UINT8_TO_FLOAT(_MOT_REGS->ANG_CURR)
+#define MOT_CANG (*((volatile float *)(_MOT_REGS->ANG_CURR)))
 
 // Motor Status Register
 #define MOT_SR _MOT_REGS->STAT[0]

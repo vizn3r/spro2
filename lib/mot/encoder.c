@@ -1,44 +1,63 @@
 #include "encoder.h"
 #include "com.h"
+#include "driver.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <util/atomic.h>
+#include <util/delay.h>
 
 #define SAMPLE_SIZE 10
 #define ADC_MID 512.0f
 #define ADC_MAX 1024.0f
+#define ADC_SETTLE 50
+#define REDUCTION 36.0f
+
+volatile float a0_buff[SAMPLE_SIZE];
+volatile uint8_t a0_head = 0;
+volatile float a0_sum = 0;
+
+volatile float a1_buff[SAMPLE_SIZE];
+volatile uint8_t a1_head = 0;
+volatile float a1_sum = 0;
 
 void encoder_init() {
   // ADC_init
-  // setting the refferance voltage to Vcc.
-  ADMUX = (1 << REFS0);
-  // Setting the prescaler to 128 which gives a frequency of 125KHz
+  // setting the reference voltage to Vcc.
+  ADMUX = (1 << REFS0) | (0 << ADLAR);
+
+  ADCSRB = 0;
   ADCSRA = (1 << ADEN) | (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2);
+  DIDR0 = (1 << ADC0D) | (1 << ADC1D);
+
+  _delay_ms(2);
+
+  // Initialize buffers to zero
+  for (int i = 0; i < SAMPLE_SIZE; i++) {
+    a0_buff[i] = 0.0f;
+    a1_buff[i] = 0.0f;
+  }
+  a0_sum = 0.0f;
+  a1_sum = 0.0f;
+  a0_head = 0;
+  a1_head = 0;
 
   // TIMER0_init
-  // Set OCR0A to 250 which gives a 1ms timer with 64 prescaler at 16MHz main
-  // clock
-  OCR0A = 250;
-  // TIMER0 CTC with OCR0 as Top
+  // Set OCR0A to 249 (not 250) for exact 1ms with 64 prescaler at 16MHz
+  // 16MHz / 64 / 250 = 1000Hz = 1ms
+  OCR0A = 249;
+
+  // TIMER0 CTC with OCR0A as Top
   TCCR0A = (1 << WGM01);
+
   // TIMER0 - 64 prescaler
   TCCR0B = (1 << CS01) | (1 << CS00);
+
   // Enables Interrupts for TIMER0_COMPA_vect every time the timer overflows
-  // meaning every 1ms
   TIMSK0 = (1 << OCIE0A);
 }
-
-volatile float abs_angle = 0;
-
-volatile float a0_buff[SAMPLE_SIZE];
-volatile uint8_t a0_head;
-volatile float a0_sum;
-
-volatile float a1_buff[SAMPLE_SIZE];
-volatile uint8_t a1_head;
-volatile float a1_sum;
 
 float adc_avg(uint16_t sample, volatile float *buff, volatile uint8_t *head,
               volatile float *sum) {
@@ -46,10 +65,10 @@ float adc_avg(uint16_t sample, volatile float *buff, volatile uint8_t *head,
   *sum -= buff[*head];
 
   // Store new sample
-  buff[*head] = sample;
+  buff[*head] = (float)sample; // Explicit cast
 
   // Add new sample to sum
-  *sum += sample;
+  *sum += (float)sample;
 
   // Update head
   *head = (*head + 1) % SAMPLE_SIZE;
@@ -57,25 +76,26 @@ float adc_avg(uint16_t sample, volatile float *buff, volatile uint8_t *head,
   return *sum / SAMPLE_SIZE;
 }
 
-void get_curr_ang() {
-  // IMPLEMMENT ANGLE MEASUREMENT
-  // ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { MOT_CANG = abs_angle; } 
-}
-
-volatile uint16_t adc_read(uint8_t channel) {
-  // Set the port to be read
-  ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
-  // Start the read conversion
+uint16_t adc_read(uint8_t channel) {
+  ADMUX = (ADMUX & 0xF0) | channel;
   ADCSRA |= (1 << ADSC);
-  // Wait for conversion to finish
-  while (ADCSRA & (1 << ADSC)) {
-  }
+
+  _delay_us(ADC_SETTLE);
+
+  while (ADCSRA & (1 << ADSC))
+    ;
+
+  _delay_us(ADC_SETTLE);
   return ADC;
 }
 
+volatile float mot_tot_angle = 0.0f;
+static float prev_abs_angle = 0.0f;
+
 ISR(TIMER0_COMPA_vect) {
-  int A0 = adc_read(0);
-  int A1 = adc_read(1);
+  // Read ADC values
+  uint16_t A0 = adc_read(6);
+  uint16_t A1 = adc_read(7);
 
   // Compute averages
   float avg0 = adc_avg(A0, a0_buff, &a0_head, &a0_sum);
@@ -85,11 +105,25 @@ ISR(TIMER0_COMPA_vect) {
   float sin_val = (avg0 - ADC_MID) / ADC_MID;
   float cos_val = (avg1 - ADC_MID) / ADC_MID;
 
+  float abs_angle = atan2f(sin_val, cos_val) * (180.0f / M_PI);
+  if (abs_angle < 0.0f)
+    abs_angle += 360.0f;
+
   // Absolute angle calculation
-  abs_angle = atan2(sin_val, cos_val) * (180.0f / (float)M_PI);
-  if (abs_angle < 0) {
-    abs_angle += 360;
-    
-  }
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { MOT_CANG = abs_angle; } 
+  float delta = abs_angle - prev_abs_angle;
+  if (delta > 180.0f)
+    delta -= 360.0f;
+  if (delta < -180.0f)
+    delta += 360.0f;
+
+  mot_tot_angle += delta;
+  prev_abs_angle = abs_angle;
+
+  float out_tot_angle = mot_tot_angle / REDUCTION;
+  float angle = fmodf(out_tot_angle, 360.0f);
+  if (angle < 0.0f)
+    angle += 360.0f;
+
+  // Update global angle variable atomically
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { MOT_CANG = angle; }
 }

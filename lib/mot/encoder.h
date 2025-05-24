@@ -4,6 +4,6 @@
 
 void encoder_init();
 
-volatile uint16_t adc_read(uint8_t channel);
+uint16_t adc_read(uint8_t channel);
 
 void get_curr_ang();

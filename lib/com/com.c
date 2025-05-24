@@ -6,11 +6,11 @@
 void com_init() {
   // Init registers
 
-  eeprom_or_def(MOT_ADDR_ANG, FLOAT_TO_UINT8(MOT_ANG));
-  eeprom_or_def(MOT_ADDR_CANG, FLOAT_TO_UINT8(MOT_CANG));
-  eeprom_or_def(MOT_ADDR_SR, MOT_TO_UINT8(MOT_SR));
-  eeprom_or_def(MOT_ADDR_SER, MOT_TO_UINT8(MOT_SER));
-  eeprom_or_def(MOT_ADDR_CR, MOT_TO_UINT8(MOT_CR));
+  // eeprom_or_def(MOT_ADDR_ANG, FLOAT_TO_UINT8(MOT_ANG));
+  // eeprom_or_def(MOT_ADDR_CANG, FLOAT_TO_UINT8(MOT_CANG));
+  // eeprom_or_def(MOT_ADDR_SR, MOT_TO_UINT8(MOT_SR));
+  // eeprom_or_def(MOT_ADDR_SER, MOT_TO_UINT8(MOT_SER));
+  // eeprom_or_def(MOT_ADDR_CR, MOT_TO_UINT8(MOT_CR));
 
   // Init i2c
   i2c_slave_init(SLAVE_ADDR);
