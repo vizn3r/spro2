@@ -253,7 +253,7 @@ uint8_t **nx_separate_multiple(uint8_t *bytes, size_t size) {
   return buffer;
 }
 
-size_t nx_buff_size(uint8_t *buff) { return sizeof(buff) / sizeof(uint8_t); }
+// size_t nx_buff_size(uint8_t *buff) { return sizeof(buff) / sizeof(uint8_t); }
 
 void nx_init(uart_port_t port, int baud, int rx_pin, int tx_pin) {
   uart_num = port;
@@ -269,7 +269,6 @@ void nx_init(uart_port_t port, int baud, int rx_pin, int tx_pin) {
   uart_driver_install(uart_num, 2048, 2048, 0, NULL, 0);
 
   uint8_t *buff = nx_alloc_buff();
-  size_t buff_size;
 
   nx_send("rest");
 

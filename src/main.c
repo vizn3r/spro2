@@ -2,29 +2,38 @@
 #include "driver/i2c.h"
 #include "driver/uart.h"
 #include "esp_err.h"
+#include "esp_event.h"
 #include "esp_log.h"
+#include "esp_sntp.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/idf_additions.h"
 #include "freertos/projdefs.h"
 #include "freertos/task.h"
-#include "nvs.h"
-
-#include "../lib/api/api.h"
-#include "../lib/motor/motor.h"
-#include "../lib/nextion/nx.h"
 #include "hal/gpio_types.h"
 #include "hal/uart_types.h"
+#include "nvs.h"
+#include "nvs_flash.h"
 #include "portmacro.h"
+
+// #define I2C_SDA 4
+// #define I2C_SCL 5
+
+#include "../lib/api/api.h"
+#include "../lib/i2c/i2c.h"
+#include "../lib/motor/motor.h"
+#include "../lib/nextion/nx.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <time.h>
 
 // Used for debug
-#define DEBUG 0
+#define DEBUG 1
 
-#define CONFIG_FREERTOS_HZ 80000000 // 80MHz
+// #define CONFIG_FREERTOS_HZ 80000000 // 80MHz
 
 #define UPDATE_PERIOD 1000 * 60 * 30 // Every 30 minutes
 
@@ -35,6 +44,8 @@
 
 volatile unsigned int HOUR = 0;
 volatile unsigned int MINUTE = 0;
+time_t time_now;
+struct tm time_info;
 
 volatile unsigned int ALARM_HOUR = 0;
 volatile unsigned int ALARM_MINUTE = 0;
@@ -70,7 +81,21 @@ void move_to_flap(motor_t motor, uint8_t flap_n) {
 }
 
 void update_time() {
-  // Uupdate HOUR and MINUTE through NTP
+  // Update HOUR and MINUTE through NTP
+  int retry = 0;
+  const int retry_count = 10;
+  while (esp_sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET &&
+         ++retry < retry_count) {
+    vTaskDelay(pdMS_TO_TICKS(2000));
+  }
+
+  if (esp_sntp_get_sync_status() == SNTP_SYNC_STATUS_COMPLETED) {
+    time(&time_now);
+    localtime_r(&time_now, &time_info);
+
+    HOUR = time_info.tm_hour;
+    MINUTE = time_info.tm_min;
+  }
 }
 
 // place is MSD
@@ -102,6 +127,14 @@ void update_flap(motor_t motor, uint8_t flap_range, uint8_t req_flap_d) {
 // xTimer handles
 
 void update_weather(TimerHandle_t xTimer) { get_weather_now(LOCATION, "en"); }
+void update_flaps(TimerHandle_t xTimer) {
+  update_time();
+
+  update_flap(M1, 9, get_digit(MINUTE, 0));
+  update_flap(M0, 5, get_digit(MINUTE, 1));
+  update_flap(H1, 9, get_digit(HOUR, 0));
+  update_flap(H0, 2, get_digit(HOUR, 1));
+}
 
 // NVS funcs
 
@@ -132,6 +165,9 @@ void nvs_write(const char *key, char *value) {
 
   err = nvs_set_str(nvs, key, value);
   // handle err
+  if (err != ESP_OK) {
+    ESP_LOGE("NVS", "ERR");
+  }
 
   nvs_commit(nvs);
   nvs_close(nvs);
@@ -160,16 +196,50 @@ void config_location() {
 }
 
 void app_main() {
+  esp_log_level_set("*", ESP_LOG_INFO);
   if (DEBUG) {
     mot_init();
-    motor_t motor = mot_new(0x08);
 
+    motor_t m1 = mot_new(0x08);
+
+    uint8_t buff[4] = {0, 0, 0, 0};
+    uint8_t buff1[4] = {0, 0, 0, 0};
+    uint8_t buff2[4] = {0, 0, 0, 0};
     for (;;) {
-      mot_angle(&motor, 0, 0);
-      vTaskDelay(portTICK_PERIOD_MS * 5000);
-      mot_angle(&motor, 0, 180);
-      vTaskDelay(portTICK_PERIOD_MS * 5000);
+      float angle = 180;
+      memcpy(buff, &angle, sizeof(float));
+      ESP_LOGI("DELAY", "WRITE: %0.2f", angle);
+      i2c_write(m1.address, MOT_REG_ANG, buff, 4);
+
+      i2c_read(m1.address, MOT_REG_ANG, buff1, 4);
+      ESP_LOGI("DATA", "READ: %0.2f", *(float *)buff1);
+
+      i2c_read(m1.address, MOT_REG_ANG_CURR, buff2, 4);
+      ESP_LOGI("DATA", "MOT_REG_ANG_CURR: %0.2f", *(float *)buff2);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
     }
+    // float angle;
+    // for (;;) {
+    //   angle = 1000.0f;
+    //   memcpy(buff, &angle, sizeof(float));
+    //   i2c_write(m1.address, MOT_REG_ANGLE, buff, 4);
+    //   vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    //  angle = 100.0f;
+    //  memcpy(buff, &angle, sizeof(float));
+    //  i2c_write(m1.address, MOT_REG_ANGLE, buff, 4);
+    //  vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //}
+    // mot_init();
+    // motor_t motor = mot_new(0x08);
+
+    // float angle = 0.0;
+    // for (;;) {
+    //   mot_get_angle(&motor, (uint8_t *)&angle);
+    //   vTaskDelay(pdMS_TO_TICKS(500));
+
+    //  ESP_LOGI("ANGLE", "%0.2f", angle);
+    //}
     return;
   }
 
@@ -179,15 +249,19 @@ void app_main() {
   TimerHandle_t weather_timer =
       xTimerCreate("updt_weather", pdMS_TO_TICKS(UPDATE_PERIOD), pdTRUE, NULL,
                    update_weather);
+  TimerHandle_t flaps_timer = xTimerCreate(
+      "updt_flaps", pdMS_TO_TICKS(UPDATE_PERIOD), pdTRUE, NULL, update_flaps);
 
   H0 = mot_new(0x08); // Hours first decimal
   H1 = mot_new(0x09); // Hours second decimal
   M0 = mot_new(0x0A); // Minutes first decimal
   M1 = mot_new(0x0B); // Minutes second decimal
 
+  /// Update routines
   xTimerStart(weather_timer, 0);
+  xTimerStart(flaps_timer, 0);
 
-  // Startup
+  /// Startup
 
   // Setup BUZZER_PIN
   gpio_config_t buzzer = {.pin_bit_mask = (1ULL << BUZZER_PIN),
@@ -198,24 +272,26 @@ void app_main() {
 
   gpio_config(&buzzer);
 
-  // Initial config from user
+  // Setup NTP
+  esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  esp_sntp_setservername(0, "pool.ntp.org");
+  esp_sntp_init();
+
+  /// Initial config from user
   config_wifi_pass();
   config_location();
 
-  // Updating flaps
+  /// Updating flaps
+  update_time();
 
-  // Main loop
+  update_flap(M1, 9, get_digit(MINUTE, 0));
+  update_flap(M0, 5, get_digit(MINUTE, 1));
+  update_flap(H1, 9, get_digit(HOUR, 0));
+  update_flap(H0, 2, get_digit(HOUR, 1));
+
+  /// Main loop
   for (;;) {
-    // Updating time / weather
-    update_time();
-
-    // Updating flaps
-    update_flap(M1, 9, get_digit(MINUTE, 0));
-    update_flap(M0, 5, get_digit(MINUTE, 1));
-    update_flap(H1, 9, get_digit(HOUR, 0));
-    update_flap(H0, 2, get_digit(HOUR, 1));
-
-    // Check alarm
+    /// Check alarm
     if (ALARM_ENABLED && (ALARM_HOUR == HOUR) && (ALARM_MINUTE == MINUTE)) {
       // Start alarm
       gpio_set_level(BUZZER_PIN, 1);
@@ -223,6 +299,7 @@ void app_main() {
       // Pop a stop button on the display and wait for the button press
     }
 
-    // Check for user input
+    /// Check for user input
+    nx_check(NULL, 0);
   }
 }

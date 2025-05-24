@@ -23,7 +23,7 @@ void mot_angle(motor_t *motor, mot_dir_t direction, float angle) {
   memcpy(buff, &angle, sizeof(float));
 
   mot_write_reg(motor, MOT_REG_CONTROL, cr_buff, 1);
-  mot_write_reg(motor, MOT_REG_ANGLE, buff, 4);
+  mot_write_reg(motor, MOT_REG_ANG, buff, 4);
 }
 
 void mot_write_reg(motor_t *motor, mot_reg_t reg, uint8_t *data, size_t len) {

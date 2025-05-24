@@ -19,7 +19,7 @@ typedef enum {
 // I2C registers on the motor
 typedef enum {
   // Angle mode
-  MOT_REG_ANGLE = 0x00, // Set the angle motor should hold
+  MOT_REG_ANG = 0x00, // Set the angle motor should hold
 
   // State registers (read)
   MOT_REG_ANG_CURR = 0x04,   // Current angle
@@ -28,6 +28,9 @@ typedef enum {
 
   // Control register
   MOT_REG_CONTROL = 0x0a, // Set the control register bytes
+
+  // Testing code
+  MOT_REG_TEST = 0x0F,
 } mot_reg_t;
 
 enum mot_control_reg_t {

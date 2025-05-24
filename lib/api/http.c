@@ -48,7 +48,7 @@ cJSON *http_get_json(const char *url) {
   }
 
   int total_read = 0;
-  int read_len;
+  int read_len = 0;
   while (total_read < buffer_size) {
     read_len = esp_http_client_read(client, buffer + total_read,
                                     buffer_size - total_read);
