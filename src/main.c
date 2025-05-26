@@ -23,6 +23,7 @@ void blink_err(mot_error_t err);
 int main(void) {
   com_init();
   encoder_init();
+  driver_init();
 
   sei();
 
@@ -42,8 +43,7 @@ int main(void) {
 
   for (;;) {
     // blink_err(MOT_SER);
-    //  check_cr();
-    mot_drive();
+    // check_cr();
   }
 
   return 0;

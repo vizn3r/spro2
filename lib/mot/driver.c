@@ -6,17 +6,17 @@
 #include <stdint.h>
 #include <util/atomic.h>
 
-#define Kp 25.0f
-#define Ki 2.5f
+#define Kp 20.0f
+#define Ki 5.0f
 #define Kd 7.5f
 
 #define DT 0.001f // 1ms
 
-#define PWM_MIN 100
-#define PWM_MAX 255
+#define PWM_MIN 70
+#define PWM_MAX 200
 
-#define INT_MIN -100.0f
-#define INT_MAX 100.0f
+#define INT_MAX 128.0f
+#define INT_MIN -INT_MAX
 
 static float pid_integral = 0.0f;
 static float pid_prev_err = 0.0f;

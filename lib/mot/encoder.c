@@ -9,11 +9,11 @@
 #include <util/atomic.h>
 #include <util/delay.h>
 
-#define SAMPLE_SIZE 10
+#define SAMPLE_SIZE 16
 #define ADC_MID 512.0f
 #define ADC_MAX 1024.0f
-#define ADC_SETTLE 50
-#define REDUCTION 36.0f
+#define ADC_SETTLE 0
+#define REDUCTION 30.0f
 
 volatile float a0_buff[SAMPLE_SIZE];
 volatile uint8_t a0_head = 0;
@@ -84,8 +84,6 @@ uint16_t adc_read(uint8_t channel) {
 
   while (ADCSRA & (1 << ADSC))
     ;
-
-  _delay_us(ADC_SETTLE);
   return ADC;
 }
 
@@ -94,8 +92,8 @@ static float prev_abs_angle = 0.0f;
 
 ISR(TIMER0_COMPA_vect) {
   // Read ADC values
-  uint16_t A0 = adc_read(6);
-  uint16_t A1 = adc_read(7);
+  uint16_t A0 = adc_read(7);
+  uint16_t A1 = adc_read(6);
 
   // Compute averages
   float avg0 = adc_avg(A0, a0_buff, &a0_head, &a0_sum);
