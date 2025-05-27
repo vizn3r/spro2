@@ -32,6 +32,7 @@
 
 // Used for debug
 #define DEBUG 1
+#define LED_PIN GPIO_NUM_15
 
 // #define CONFIG_FREERTOS_HZ 80000000 // 80MHz
 
@@ -135,6 +136,11 @@ void update_flaps(TimerHandle_t xTimer) {
   update_flap(H1, 9, get_digit(HOUR, 0));
   update_flap(H0, 2, get_digit(HOUR, 1));
 }
+bool led_state = 0;
+void update_led(TimerHandle_t xTimer) {
+  led_state = !led_state;
+  gpio_set_level(LED_PIN, led_state);
+}
 
 // NVS funcs
 
@@ -197,6 +203,20 @@ void config_location() {
 
 void app_main() {
   esp_log_level_set("*", ESP_LOG_INFO);
+
+  gpio_config_t io_conf = {
+      .pin_bit_mask = (1ULL << LED_PIN),
+      .mode = GPIO_MODE_OUTPUT,
+      .pull_up_en = GPIO_PULLUP_DISABLE,
+      .pull_down_en = GPIO_PULLDOWN_DISABLE,
+      .intr_type = GPIO_INTR_DISABLE,
+  };
+
+  gpio_config(&io_conf);
+  TimerHandle_t led_timer =
+      xTimerCreate("blink_led", pdMS_TO_TICKS(500), pdTRUE, NULL, update_led);
+  xTimerStart(led_timer, 0);
+
   if (DEBUG) {
     mot_init();
 

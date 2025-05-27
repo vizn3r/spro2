@@ -3,7 +3,6 @@
 #include "driver/i2c.h"
 #include "esp_err.h"
 #include "esp_log.h"
-#include "esp_log_level.h"
 #include "hal/gpio_types.h"
 #include "hal/i2c_types.h"
 #include "portmacro.h"
@@ -11,11 +10,11 @@
 #include <stdint.h>
 
 #ifndef I2C_SDA
-#define I2C_SDA 8
+#define I2C_SDA 14
 #endif
 
 #ifndef I2C_SCL
-#define I2C_SCL 9
+#define I2C_SCL 13
 #endif
 
 #define I2C_NUM 0
