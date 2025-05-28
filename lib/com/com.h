@@ -17,6 +17,9 @@ typedef struct {
 
   // Control register
   uint8_t CONTROL[1];
+
+  // For debugging/testing
+  uint8_t MSG[32];
 } mot_reg_t;
 
 // EEPROM addresses
@@ -26,10 +29,7 @@ typedef enum {
   MOT_ADDR_SR = 0x08,
   MOT_ADDR_SER = 0x09,
   MOT_ADDR_CR = 0x0a,
-
-  // Home angle
-  MOT_ADDR_HANG = 0x0b,
-
+  MOT_ADDR_MSG = 0x0b,
 } mot_eeprom_addr_t;
 
 volatile uint8_t mot_registers[sizeof(mot_reg_t)];
@@ -57,15 +57,17 @@ volatile uint8_t mot_registers[sizeof(mot_reg_t)];
 // Motor Control Register
 #define MOT_CR _MOT_REGS->CONTROL[0]
 
+#define MOT_MSG()
+
 enum mot_control_reg_t {
   // Toggles
   MOT_CR_POWER, // On/Off
   MOT_CR_BREAK, // Enable break
   MOT_CR_DIR,   // Spin direction
   MOT_CR_LED,   // On/Off LED indicators
-  MOT_CR_UNSET, // UNSET for now
 
   // Triggers
+  MOT_CR_PID,       // Trigger PID tuning
   MOT_CR_HOME,      // Set current position as home
   MOT_CR_CLEAR_ERR, // Clear error message
   MOT_CR_RESET,     // Reset motor
